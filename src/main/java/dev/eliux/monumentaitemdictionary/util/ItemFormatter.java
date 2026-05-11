@@ -301,6 +301,7 @@ public class ItemFormatter {
                 inEnchant.equals("projectile_fragility") ||
                 inEnchant.equals("magic_fragility") ||
                 inEnchant.equals("ailment_fragility") ||
+                inEnchant.equals("fall_fragility") ||
                 inEnchant.equals("curse_of_anemia") ||
                 inEnchant.equals("cumbersome") ||
                 inEnchant.equals("curse_of_ephemerality") ||
