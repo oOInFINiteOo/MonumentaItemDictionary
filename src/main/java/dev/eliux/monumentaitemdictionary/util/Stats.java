@@ -10,7 +10,7 @@ public class Stats {
     public double armor;
     public double agility;
     public Percentage speedPercent;
-    public int knockbackRes;
+    public Percentage knockbackRes;
     public int thorns;
     public double fireTickDamage;
     // Health Stats
@@ -329,7 +329,7 @@ public class Stats {
         speedPercent = speedPercent
                 .mul((speedFlat)/0.1, false)
                 .mul(((currentHealthPercent.perc <= 50) ? 1 - 0.1 * crippling : 1), false);
-        knockbackRes = (knockbackRes > 10) ? 100 : knockbackRes * 10;
+        knockbackRes = ((knockbackRes.val > 10) ? new Percentage(10, false): knockbackRes).mul(0.1, false);
 
         effHealingRate = new Percentage(((20 / healthFinal) * healingRate.val), false);
         regenPerSec = 0.33 * sqrt(regenPerSec) * healingRate.val;
@@ -373,7 +373,7 @@ public class Stats {
             armor += sumNumberStat(itemStats, "armor", 0);
             speedPercent.add(sumNumberStat(itemStats, "speed_percent", 0), true);
             speedFlat += sumNumberStat(itemStats, "speed_flat", 0);
-            knockbackRes += sumNumberStat(itemStats, "knockback_resistance_flat", 0);
+            knockbackRes.add(sumNumberStat(itemStats, "knockback_resistance_flat", 0), false);
             thorns += sumNumberStat(itemStats, "thorns_flat", 0);
             throwRatePercent.add(sumNumberStat(itemStats, "throw_rate_percent", 0), true);
             fireTickDamage += sumNumberStat(itemStats, "inferno", 0);
@@ -432,7 +432,7 @@ public class Stats {
         armor = 0;
         speedPercent = new Percentage(100, true);
         speedFlat = 0.1;
-        knockbackRes = 0;
+        knockbackRes = new Percentage(0, false);
         thorns = 0;
         fireTickDamage = 1;
         thornsPercent = new Percentage(100, true);

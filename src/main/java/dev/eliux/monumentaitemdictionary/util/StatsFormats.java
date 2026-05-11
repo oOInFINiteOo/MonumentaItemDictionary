@@ -8,7 +8,7 @@ public class StatsFormats {
        put("armor", "Armor: ");
        put("agility", "Agility: ");
        put("speedPercent", "% Speed: ");
-       put("knockbackRes", "KB Resistance: ");
+       put("knockbackRes", "% KB Resistance: ");
        put("thorns", "Thorns Damage: ");
        put("fireTickDamage", "Fire Tick Damage: ");
        put("healthFinal", "Max Health: ");
