@@ -50,7 +50,7 @@ public class ItemColors {
     public static final int GENERALIST_COLOR = 0x9F8F91;
 
     public static final int WHITE_COLOR = 0xFFFFFF;
-    public static final int ORANGE_COLOR = 0xFFAA00;
+    public static final int ORANGE_COLOR = 0xFF8000;
     public static final int MAGENTA_COLOR = 0xFF55FF;
     public static final int LIGHT_BLUE_COLOR = 0x4AC2E5;
     public static final int YELLOW_COLOR = 0xFFFF55;
@@ -132,8 +132,8 @@ public class ItemColors {
     public static final int WINTER_EVENT_COLOR = 0xAFC2E3;
     public static final int HOLIDAY_SKIN_COLOR = 0xB00C2F;
     public static final int COALRUPTED_SIERHAVEN_COLOR = 0xA1C4E0;
-    public static final int HALLOWEEN_EVENT_COLOR = 0xFFAA00;
-    public static final int HALLOWEEN_SKIN_COLOR = 0xFFAA00;
+    public static final int HALLOWEEN_EVENT_COLOR = 0xFF6600;
+    public static final int HALLOWEEN_SKIN_COLOR = 0xFF6600;
     public static final int FISHING_COLOR = 0xA9D1D0;
     public static final int CHALLENGER_COLOR = 0xFEDC10;
     public static final int TRUE_NORTH_COLOR = 0xFFD700;
