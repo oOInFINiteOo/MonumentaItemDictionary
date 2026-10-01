@@ -1,4 +1,3 @@
-// Modified 2026-10-01: update location display names and colors from the Monumenta API.
 package dev.eliux.monumentaitemdictionary.util;
 
 public class ItemColors {
@@ -157,77 +156,44 @@ public class ItemColors {
 
     public static int getColorForTier(String itemTier) {
         return switch (itemTier) {
-            case "Legendary":
-                yield LEGENDARY_COLOR;
-            case "Epic":
-                yield EPIC_COLOR;
-            case "Artifact":
-                yield ARTIFACT_COLOR;
-            case "Rare":
-                yield RARE_COLOR;
-            case "Base":
-                yield BASE_COLOR;
-            case "Unique":
-                yield UNIQUE_COLOR;
-            case "Event":
-                yield EVENT_COLOR;
-            case "Patron":
-                yield PATRON_COLOR;
-            case "Event Currency":
-                yield CURRENCY_COLOR;
-            case "Currency":
-                yield EVENT_CURRENCY_COLOR;
-            case "Trophy":
-                yield TROPHY_COLOR;
-            case "Key":
-                yield KEY_COLOR;
-            case "Fish":
-                yield FISH_COLOR;
-            case "Legacy":
-                yield LEGACY_COLOR;
-            case "Obfuscated":
-                yield OBFUSCATED_COLOR;
-            case "Uncommon":
-                yield UNCOMMON_COLOR;
-            case "Tier 5":
-                yield TIER5_COLOR;
-            case "Tier 4":
-                yield TIER4_COLOR;
-            case "Tier 3":
-                yield TIER3_COLOR;
-            case "Tier 2":
-                yield TIER2_COLOR;
-            case "Tier 1":
-                yield TIER1_COLOR;
-            case "Tier 0":
-                yield TIER0_COLOR;
-            default:
-                yield DEFAULT_COLOR;
+            case "Legendary" -> LEGENDARY_COLOR;
+            case "Epic" -> EPIC_COLOR;
+            case "Artifact" -> ARTIFACT_COLOR;
+            case "Rare" -> RARE_COLOR;
+            case "Base" -> BASE_COLOR;
+            case "Unique" -> UNIQUE_COLOR;
+            case "Event" -> EVENT_COLOR;
+            case "Patron" -> PATRON_COLOR;
+            case "Event Currency" -> CURRENCY_COLOR;
+            case "Currency" -> EVENT_CURRENCY_COLOR;
+            case "Trophy" -> TROPHY_COLOR;
+            case "Key" -> KEY_COLOR;
+            case "Fish" -> FISH_COLOR;
+            case "Legacy" -> LEGACY_COLOR;
+            case "Obfuscated" -> OBFUSCATED_COLOR;
+            case "Uncommon" -> UNCOMMON_COLOR;
+            case "Tier 5" -> TIER5_COLOR;
+            case "Tier 4" -> TIER4_COLOR;
+            case "Tier 3" -> TIER3_COLOR;
+            case "Tier 2" -> TIER2_COLOR;
+            case "Tier 1" -> TIER1_COLOR;
+            case "Tier 0" -> TIER0_COLOR;
+            default -> DEFAULT_COLOR;
         };
     }
 
     public static int getColorForClass(String charmClass) {
         return switch(charmClass) {
-            case "Alchemist":
-                yield ALCHEMIST_COLOR;
-            case "Warrior":
-                yield WARRIOR_COLOR;
-            case "Cleric":
-                yield CLERIC_COLOR;
-            case "Rogue":
-                yield ROGUE_COLOR;
-            case "Mage":
-                yield MAGE_COLOR;
-            case "Scout":
-                yield SCOUT_COLOR;
-            case "Warlock":
-                yield WARLOCK_COLOR;
-            case "Shaman":
-                yield SHAMAN_COLOR;
-            case "Generalist":
-                yield GENERALIST_COLOR;
-            default:
-                yield DEFAULT_COLOR;
+            case "Alchemist" -> ALCHEMIST_COLOR;
+            case "Warrior" -> WARRIOR_COLOR;
+            case "Cleric" -> CLERIC_COLOR;
+            case "Rogue" -> ROGUE_COLOR;
+            case "Mage" -> MAGE_COLOR;
+            case "Scout" -> SCOUT_COLOR;
+            case "Warlock" -> WARLOCK_COLOR;
+            case "Shaman" -> SHAMAN_COLOR;
+            case "Generalist" -> GENERALIST_COLOR;
+            default -> DEFAULT_COLOR;
         };
     }
 

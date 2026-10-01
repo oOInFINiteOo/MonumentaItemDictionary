@@ -33,16 +33,16 @@ public class CharmButtonWidget extends ButtonWidget {
         this.gui = gui;
 
         // dummy itemstack for rendering item icon
-        builtItem = ItemFactory.fromEncoding(charm.baseItem.split("/")[0].trim().toLowerCase().replace(" ", "_"));
+        builtItem = ItemFactory.fromIcon(charm.baseItem, charm.nbt);
         NbtCompound baseNbt = builtItem.getOrCreateNbt();
 
         NbtCompound monumenta = new NbtCompound();
         monumenta.putInt("CharmPower", charm.power);
         monumenta.putString("Tier", switch(charm.tier) {
-            case "Base": yield "charm";
-            case "Rare": yield "rarecharm";
-            case "Epic": yield "epiccharm";
-            default: yield "";
+            case "Base" -> "charm";
+            case "Rare" -> "rarecharm";
+            case "Epic" -> "epiccharm";
+            default -> "";
         });
         baseNbt.put("Monumenta", monumenta);
 

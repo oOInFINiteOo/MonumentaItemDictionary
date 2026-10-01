@@ -400,6 +400,7 @@ public class ItemDictionaryGui extends Screen {
 
         if (showStats != null) {
             for (ItemStat stat : showStats) {
+                if (stat.statName.equals("alchemical_utensil") || stat.statName.equals("utility_item_for_armory")) continue;
                 Text line = Text.literal(ItemFormatter.buildStatString(stat.statName, stat.statValue)).setStyle(Style.EMPTY
                         .withColor(ItemColors.getColorForStat(stat.statName, stat.statValue)));
                 if (ItemFormatter.isStat(stat.statName)) {
@@ -418,12 +419,18 @@ public class ItemDictionaryGui extends Screen {
             lines.addAll(enchants);
         }
 
+        if (item.type.equals("Wand")) {
+            lines.add(Text.literal("* Magic Wand *").setStyle(Style.EMPTY.withColor(ItemColors.TEXT_COLOR)));
+        }
+        if (showStats != null && showStats.stream().anyMatch(stat ->
+                stat.statName.equals("alchemical_utensil") && stat.statValue > 0)) {
+            lines.add(Text.literal("* Alchemical Utensil *").setStyle(Style.EMPTY.withColor(ItemColors.TEXT_COLOR)));
+        }
+
         if (item.hasRegion() || item.hasTier()) {
             MutableText regionText = Text.literal(item.hasRegion() ? ItemFormatter.formatRegion(item.region) + (item.hasTier() ? " : " : "") : "")
                     .setStyle(Style.EMPTY.withColor(ItemColors.TEXT_COLOR));
-            MutableText tierText = Text.literal(item.hasTier() ? itemTier : "").setStyle(Style.EMPTY
-                    .withColor(ItemColors.getColorForTier(itemTier))
-                    .withBold(ItemFormatter.shouldUnderline(itemTier)));
+            MutableText tierText = ItemFormatter.getTierText(item.hasTier() ? itemTier : "");
 
             lines.add(regionText.append(tierText));
         }
@@ -453,8 +460,7 @@ public class ItemDictionaryGui extends Screen {
         }
 
         if (item.hasLocation()) {
-            lines.add(Text.literal(item.location).setStyle(Style.EMPTY
-                    .withColor(ItemColors.getColorForLocation(item.location))));
+            lines.add(ItemFormatter.getLocationText(item.location));
         }
 
         if (!item.lore.isEmpty()) {

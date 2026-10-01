@@ -33,8 +33,8 @@ import static java.lang.Math.max;
 public class BuilderGui extends Screen {
     private final DictionaryController controller;
     public final List<String> itemTypesIndex = Arrays.asList("Mainhand", "Offhand", "Helmet", "Chestplate", "Leggings", "Boots");
-    public final List<String> situationals = Arrays.asList("Shielding", "Poise", "Inure", "Steadfast", "Guard", "Second Wind", "Ethereal", "Reflexes", "Evasion", "Tempo", "Cloaked", "Versatile");
-    public final List<String> infusions = Arrays.asList("Vigor", "Focus", "Tenacity", "Vitality", "Perspicacity");
+    public final List<String> situationals = Arrays.asList("Shielding", "Inure", "Poise", "Steadfast", "Guard", "Tempo", "Reflexes", "Ethereal", "Evasion", "Cloaked", "Second Wind", "Versatile");
+    public final List<String> infusions = Arrays.asList("Focus", "Perspicacity", "Tenacity", "Vigor", "Vitality");
     private final List<BuildItemButtonWidget> buildItemButtons = new ArrayList<>();
     private final List<BuildCharmButtonWidget> buildCharmButtons = new ArrayList<>();
     public List<DictionaryCharm> charms = new ArrayList<>();
@@ -110,12 +110,13 @@ public class BuilderGui extends Screen {
                 1) {
             @Override
             protected void updateMessage() {
-                this.setMessage(Text.literal("Current Health: " + (float) this.value * 100 + "%"));
+                this.setMessage(Text.literal("Current Health: " + Math.round(this.value * 100) + "%"));
             }
 
             @Override
             protected void applyValue() {
-                currentHealthPercent = this.value * 100;
+                currentHealthPercent = Math.round(this.value * 100);
+                this.value = currentHealthPercent / 100.0;
                 updateStats();
             }
         };
@@ -156,7 +157,10 @@ public class BuilderGui extends Screen {
                 .values(Regions.values())
                 .initially(Regions.NO_REGION)
                 .build(55, 5, 125, 20, Text.literal("Region"),
-                        (button, region) -> this.region = region);
+                        (button, region) -> {
+                            this.region = region;
+                            updateStats();
+                        });
 
         classButton = CyclingButtonWidget.builder(ClassName::getText)
                 .values(ClassName.values())
@@ -194,7 +198,7 @@ public class BuilderGui extends Screen {
             put("perspicacity", false);
         }};
 
-        this.buildStats = new Stats(buildItems, enabledSituationals, enabledInfusions, currentHealthPercent);
+        this.buildStats = new Stats(buildItems, enabledSituationals, enabledInfusions, currentHealthPercent, getStatsRegion());
         updateButtons();
         updateGuiPositions();
     }
@@ -216,15 +220,7 @@ public class BuilderGui extends Screen {
             DictionaryItem item  = buildItems.get(i);
             baseUrl.append(itemTypesIndex.get(i).substring(0, 1).toLowerCase()).append("=");
             if (item != null) {
-                if (!item.region.equals("Ring")) {
-                    if (item.name.equals("Carcano 91/38"))
-                        baseUrl.append(item.name.replace(" ", "%20").replace("/", "")).append("&"); //CARCANO HARDCODE
-                    else baseUrl.append(item.name.replace(" ", "%20")).append("&");
-                }
-                else {
-                    if (isItemExalted(item)) baseUrl.append("EX%20");
-                    baseUrl.append(item.name.replace(" ", "%20")).append(String.format("-%d", item.getMaxMasterwork()-1)).append("&");
-                }
+                baseUrl.append(getUrlItemName(item, controller.getAllItems())).append("&");
             } else baseUrl.append("None&");
         }
 
@@ -242,9 +238,15 @@ public class BuilderGui extends Screen {
         statusText = Text.literal("Build Url copied to your clipboard!").setStyle(Style.EMPTY.withColor(0xFF00FF00));
     }
 
-    private boolean isItemExalted(DictionaryItem itemToCheck) {
-        List<DictionaryItem> itemsWithSameName = controller.getItems().stream().filter(item -> item.name.equals(itemToCheck.name)).toList();
-        return itemsWithSameName.size() > 1;
+    private static String getUrlItemName(DictionaryItem item, List<DictionaryItem> dictionaryItems) {
+        String name = item.name.equals("Carcano 91/38") ? "Carcano 9138" : item.name;
+        if (item.hasMasterwork) {
+            boolean isExalted = item.region.equals("Ring") && dictionaryItems.stream()
+                    .anyMatch(other -> other.name.equals(item.name) && !other.hasMasterwork);
+            if (isExalted) name = "EX " + name;
+            name += "-" + (item.getMaxMasterwork() - 1);
+        }
+        return name.replace(" ", "%20");
     }
 
     private ArrayList<String> extractRelevantLetters(String charmName, int n) {
@@ -309,14 +311,13 @@ public class BuilderGui extends Screen {
             if (item == null) { continue; }
 
             switch (itemType) {
-                case "m": buildItems.set(0, item); break;
-                case "o": buildItems.set(1, item); break;
-                case "h": buildItems.set(2, item); break;
-                case "c": buildItems.set(3, item); break;
-                case "l": buildItems.set(4, item); break;
-                case "b": buildItems.set(5, item); break;
-                default:
-                    break;
+                case "m" -> buildItems.set(0, item);
+                case "o" -> buildItems.set(1, item);
+                case "h" -> buildItems.set(2, item);
+                case "c" -> buildItems.set(3, item);
+                case "l" -> buildItems.set(4, item);
+                case "b" -> buildItems.set(5, item);
+                default -> {}
             }
         }
 
@@ -402,7 +403,7 @@ public class BuilderGui extends Screen {
 
     public void updateGuiPositions() {
         halfWidth = width/2;
-        halfWidthPadding = textRenderer.getWidth(situationalCheckBoxList.get(6).getMessage()) + 3*(checkBoxSize + itemPadding);
+        halfWidthPadding = textRenderer.getWidth(Text.literal("Ethereal")) + 3*(checkBoxSize + itemPadding);
         buttonSize = width/18;
         itemPadding = buttonSize/10;
 
@@ -442,6 +443,7 @@ public class BuilderGui extends Screen {
                     this);
             situationalCheckBoxList.add(situationalCheckBox);
         }
+        updateSituationalVisibility();
 
         infusionsCheckBoxList.clear();
         for (int i = 0; i < infusions.size() ; i++) {
@@ -457,7 +459,7 @@ public class BuilderGui extends Screen {
             infusionsCheckBoxList.add(infusionCheckBox);
         }
 
-        halfWidthPadding = textRenderer.getWidth(situationalCheckBoxList.get(6).getMessage()) + 3*(checkBoxSize + itemPadding);
+        halfWidthPadding = textRenderer.getWidth(Text.literal("Ethereal")) + 3*(checkBoxSize + itemPadding);
 
         buildItemButtons.clear();
         for (int i = 0; i < 6; i++) {
@@ -506,9 +508,55 @@ public class BuilderGui extends Screen {
         }
     }
 
+    private int getStatsRegion() {
+        return switch (region) {
+            case KINGS_VALLEY -> 1;
+            case CELSIAN_ISLES -> 2;
+            case ARCHITECTS_RING -> 3;
+            default -> getEquipmentRegion();
+        };
+    }
+
+    private int getEquipmentRegion() {
+        int highestRegion = 1;
+        for (DictionaryItem item : buildItems) {
+            if (item == null) continue;
+            int itemRegion = switch (item.region) {
+                case "Ring" -> 3;
+                case "Isles" -> 2;
+                default -> 1;
+            };
+            highestRegion = Math.max(highestRegion, itemRegion);
+        }
+        return highestRegion;
+    }
+
+    private void updateSituationalVisibility() {
+        Set<String> equippedSituationals = new HashSet<>();
+        for (DictionaryItem item : buildItems) {
+            if (item == null) continue;
+            List<ItemStat> stats = item.hasMasterwork ? item.getStatsFromMasterwork(item.getMaxMasterwork() - 1) : item.getStatsNoMasterwork();
+            for (ItemStat stat : stats) {
+                if (stat.statValue > 0) equippedSituationals.add(stat.statName);
+            }
+        }
+        int visibleIndex = 0;
+        for (CheckBoxWidget checkbox : situationalCheckBoxList) {
+            String name = checkbox.getMessage().getString().replace(" ", "_").toLowerCase();
+            checkbox.visible = !name.equals("versatile") && equippedSituationals.contains(name);
+            checkbox.active = checkbox.visible;
+            if (checkbox.visible) {
+                checkbox.setX(width / 3 + (visibleIndex / 6) * 90);
+                checkbox.setY(labelMenuHeight + itemPadding + (checkBoxSize + itemPadding) * (visibleIndex % 6) - scrollPixels);
+                visibleIndex++;
+            }
+        }
+    }
+
     public void updateStats() {
         updateCheckBoxes();
-        buildStats = new Stats(buildItems, enabledSituationals, enabledInfusions, currentHealthPercent);
+        updateSituationalVisibility();
+        buildStats = new Stats(buildItems, enabledSituationals, enabledInfusions, currentHealthPercent, getStatsRegion());
         statsToRender.clear();
         Map<String, String> statFormatter = StatsFormats.getStatFormats();
         Field[] allFields = Stats.class.getFields();
@@ -551,7 +599,8 @@ public class BuilderGui extends Screen {
         buildItems = build.allItems;
         charms = build.charms.isEmpty() ? new ArrayList<>() : build.charms;
 
-        regionButton.setValue(region.getRegion(build.region));
+        region = region.getRegion(build.region);
+        regionButton.setValue(region);
         classButton.setValue(className.getClass(build.className));
         specializationButton.setValue(specialization.getSpecialization(build.specialization));
 
@@ -567,10 +616,11 @@ public class BuilderGui extends Screen {
         nameBar.setText("");
         charms.clear();
         classButton.setValue(ClassName.NO_CLASS);
-        regionButton.setValue(Regions.NO_REGION);
+        region = Regions.NO_REGION;
+        regionButton.setValue(region);
         specializationButton.setValue(Specializations.NO_SPECIALIZATION);
         itemOnBuildButton = null;
-        buildStats = new Stats(buildItems, enabledSituationals, enabledInfusions, currentHealthPercent);
+        buildStats = new Stats(buildItems, enabledSituationals, enabledInfusions, currentHealthPercent, getStatsRegion());
         scrollPixels = 0;
         updateStats();
         updateCheckBoxes();
@@ -580,7 +630,7 @@ public class BuilderGui extends Screen {
     private void drawButtons(DrawContext context, int mouseX, int mouseY, float delta) {
         buildItemButtons.forEach((b) -> b.renderWidget(context, mouseX, mouseY, delta));
         buildCharmButtons.forEach((b) -> b.renderWidget(context, mouseX, mouseY, delta));
-        situationalCheckBoxList.forEach((b) -> b.renderWidget(context, mouseX, mouseY, delta));
+        situationalCheckBoxList.stream().filter(b -> b.visible).forEach((b) -> b.renderWidget(context, mouseX, mouseY, delta));
         infusionsCheckBoxList.forEach((b) -> b.renderWidget(context, mouseX, mouseY, delta));
     }
 
@@ -646,22 +696,26 @@ public class BuilderGui extends Screen {
         List<String> statsTypes = new ArrayList<>(Arrays.asList("Misc Stats", "Health Stats", "DR Stats", "HP Normalized DR Stats", "EHP Stats", "Melee Stats", "Projectile Stats", "Magic Stats"));
         List<List<String>> statsByType = new ArrayList<>();
 
-        statsByType.add(statsToRender.subList(0 ,  6)); // Misc Stats
-        statsByType.add(statsToRender.subList(6 , 14)); // Health Stats
-        statsByType.add(statsToRender.subList(14, 21)); // Damage Reduction Stats
-        statsByType.add(statsToRender.subList(21, 28)); // Health Normalized Damage Reduction Stats
-        statsByType.add(statsToRender.subList(28, 35)); // EHP Stats
-        statsByType.add(statsToRender.subList(35, 42)); // Melee Stats
-        statsByType.add(statsToRender.subList(42, 48)); // Projectile Stats
-        statsByType.add(statsToRender.subList(48, 52)); // Magic Stats
+        statsByType.add(statsToRender.subList(0 ,  7)); // Misc Stats
+        statsByType.add(statsToRender.subList(7 , 15)); // Health Stats
+        statsByType.add(statsToRender.subList(15, 22)); // Damage Reduction Stats
+        statsByType.add(statsToRender.subList(22, 29)); // Health Normalized Damage Reduction Stats
+        statsByType.add(statsToRender.subList(29, 36)); // EHP Stats
+        statsByType.add(statsToRender.subList(36, 43)); // Melee Stats
+        statsByType.add(statsToRender.subList(43, 49)); // Projectile Stats
+        statsByType.add(statsToRender.subList(49, 53)); // Magic Stats
 
         int i = 0;
         int j = 0;
+        int leftColumnHeight = statsByType.subList(0, 4).stream().mapToInt(stats -> (stats.size() + 2) * 10).sum();
+        int rightColumnHeight = statsByType.subList(4, 8).stream().mapToInt(stats -> (stats.size() + 2) * 10).sum();
+        statsRow = Math.max(leftColumnHeight, rightColumnHeight);
         for (List<String> stats : statsByType) {
-            context.drawTextWithShadow(textRenderer, Text.literal(statsTypes.get(i)).setStyle(Style.EMPTY.withBold(true)), itemPadding + (i/4)* statsColumn, statsY + (j*10)% statsRow - scrollPixels, 0xFF92BDA3);
+            if (i == 4) j = 0;
+            context.drawTextWithShadow(textRenderer, Text.literal(statsTypes.get(i)).setStyle(Style.EMPTY.withBold(true)), itemPadding + (i/4)* statsColumn, statsY + j*10 - scrollPixels, 0xFF92BDA3);
             for (String stat : stats) {
                 j++;
-                context.drawTextWithShadow(textRenderer, Text.literal(stat), itemPadding + (i/4)* statsColumn, statsY + (j*10)% statsRow - scrollPixels, 0xFFA1BA89);
+                context.drawTextWithShadow(textRenderer, Text.literal(stat), itemPadding + (i/4)* statsColumn, statsY + j*10 - scrollPixels, 0xFFA1BA89);
             }
             j += 2;
             i++;
@@ -745,7 +799,7 @@ public class BuilderGui extends Screen {
         buildClipboard.mouseClicked(mouseX, mouseY, button);
         showBuildDictionaryButton.mouseClicked(mouseX, mouseY, button);
 
-        situationalCheckBoxList.forEach((b) -> b.mouseClicked(mouseX, mouseY, button));
+        situationalCheckBoxList.stream().filter(b -> b.visible).forEach((b) -> b.mouseClicked(mouseX, mouseY, button));
         infusionsCheckBoxList.forEach((b) -> b.mouseClicked(mouseX, mouseY, button));
         buildItemButtons.forEach((b) -> b.mouseClicked(mouseX, mouseY, button));
         buildCharmButtons.forEach((b) -> b.mouseClicked(mouseX, mouseY, button));
@@ -798,7 +852,7 @@ public class BuilderGui extends Screen {
     }
 
     enum Regions {
-        NO_REGION(Text.literal("No Region")),
+        NO_REGION(Text.literal("Auto")),
         KINGS_VALLEY(Text.literal("King's Valley")),
         CELSIAN_ISLES(Text.literal("Celsian Isles")),
         ARCHITECTS_RING(Text.literal("Architect's Ring"));

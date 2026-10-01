@@ -330,7 +330,7 @@ public class CharmDictionaryGui extends Screen {
                         .withColor(ItemColors.getColorForClass(charm.className)));
         lines.add(charmPowerDesc.append(charmPower).append(divider).append(classText));
 
-        lines.add(Text.literal(charm.location).setStyle(Style.EMPTY.withColor(ItemColors.getColorForLocation(charm.location))));
+        lines.add(ItemFormatter.getLocationText(charm.location));
 
         lines.add(Text.literal(""));
 

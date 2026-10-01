@@ -1,5 +1,9 @@
 package dev.eliux.monumentaitemdictionary.util;
 
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+
 import java.util.TreeMap;
 
 public class ItemFormatter {
@@ -23,6 +27,10 @@ public class ItemFormatter {
                 inTier.equals("Rare") ||
                 inTier.equals("Artifact") ||
                 inTier.equals("Epic") ||
+                inTier.equals("Event") ||
+                inTier.equals("Event Currency") ||
+                inTier.equals("Legacy") ||
+                inTier.equals("Obfuscated") ||
                 inTier.equals("Legendary");
     }
 
@@ -33,14 +41,10 @@ public class ItemFormatter {
 
     public static String formatRegion(String inRegion) {
         return switch (inRegion) {
-            case "Valley":
-                yield "King's Valley";
-            case "Isles":
-                yield "Celsian Isles";
-            case "Ring":
-                yield "Architect's Ring";
-            default:
-                yield inRegion;
+            case "Valley" -> "King's Valley";
+            case "Isles" -> "Celsian Isles";
+            case "Ring" -> "Architect's Ring";
+            default -> inRegion;
         };
     }
 
@@ -89,13 +93,9 @@ public class ItemFormatter {
 
     public static int getMasterworkForRarity(String rarity) {
         return switch (rarity) {
-            case "Rare":
-            case "Artifact":
-                yield 4;
-            case "Epic":
-                yield 6;
-            default:
-                yield 0;
+            case "Rare", "Artifact" -> 4;
+            case "Epic" -> 6;
+            default -> 0;
         };
     }
 
@@ -113,66 +113,69 @@ public class ItemFormatter {
 
     public static int getNumberForTier(String inTier) {
         return switch (inTier) {
-            case "Legendary": yield 20;
-            case "Epic": yield 19;
-            case "Artifact": yield 18;
-            case "Rare": yield 17;
-            case "Base": yield 16;
-            case "Unique": yield 15;
-            case "Patron": yield 14;
-            case "Uncommon": yield 13;
-            case "Tier 5": yield 12;
-            case "Tier 4": yield 11;
-            case "Tier 3": yield 10;
-            case "Tier 2": yield 9;
-            case "Tier 1": yield 8;
-            case "Tier 0": yield 7;
-            case "Obfuscated": yield 6;
-            case "Currency": yield 5;
-            case "Event Currency": yield 4;
-            case "Key": yield 3;
-            case "Event": yield 2;
-            case "Trophy": yield 1;
-            default: yield 0;
+            case "Legendary" -> 20;
+            case "Epic" -> 19;
+            case "Artifact" -> 18;
+            case "Rare" -> 17;
+            case "Base" -> 16;
+            case "Unique" -> 15;
+            case "Patron" -> 14;
+            case "Uncommon" -> 13;
+            case "Tier 5" -> 12;
+            case "Tier 4" -> 11;
+            case "Tier 3" -> 10;
+            case "Tier 2" -> 9;
+            case "Tier 1" -> 8;
+            case "Tier 0" -> 7;
+            case "Obfuscated" -> 6;
+            case "Currency" -> 5;
+            case "Event Currency" -> 4;
+            case "Key" -> 3;
+            case "Event" -> 2;
+            case "Trophy" -> 1;
+            default -> 0;
         };
     }
 
     public static int getNumberForRegion(String inRegion) {
         return switch (inRegion) {
-            case "Ring": yield 3;
-            case "Isles": yield 2;
-            case "Valley": yield 1;
-            default: yield 0;
+            case "Ring" -> 3;
+            case "Isles" -> 2;
+            case "Valley" -> 1;
+            default -> 0;
         };
     }
 
+    public static MutableText getTierText(String tier) {
+        return Text.literal(tier).setStyle(Style.EMPTY
+                .withColor(ItemColors.getColorForTier(tier))
+                .withBold(shouldUnderline(tier))
+                .withObfuscated(tier.equals("Obfuscated")));
+    }
+
+    public static MutableText getLocationText(String location) {
+        MutableText text;
+        if (location.equals("Twisted lxxxxxxx") || location.equals("Twisted Ixxxxxxx")) {
+            text = Text.literal("Twisted ").append(Text.literal(location.substring(8))
+                    .setStyle(Style.EMPTY.withObfuscated(true)));
+        } else {
+            text = Text.literal(location);
+        }
+        return text.setStyle(Style.EMPTY.withColor(ItemColors.getColorForLocation(location)));
+    }
+
+
     public static String formatUseLine(String inType) {
         return switch (inType) {
-            case "Helmet": yield "When on Head:";
-            case "Chestplate": yield "When on Chest:";
-            case "Leggings": yield "When on Legs:";
-            case "Boots": yield "When on Feet:";
-            case "Wand":
-            case "Axe":
-            case "Pickaxe":
-            case "Mainhand Sword":
-            case "Mainhand Shield":
-            case "Bow":
-            case "Trident":
-            case "Snowball":
-            case "Shovel":
-            case "Mainhand":
-            case "Scythe":
-            case "Crossbow":
-                yield "When in Main Hand:";
-            case "Projectile":
-                yield "When Shot:";
-            case "Offhand":
-            case "Offhand Sword":
-            case "Offhand Shield":
-                yield "When in Offhand";
-            default:
-                yield "When Used:";
+            case "Helmet" -> "When on Head:";
+            case "Chestplate" -> "When on Chest:";
+            case "Leggings" -> "When on Legs:";
+            case "Boots" -> "When on Feet:";
+            case "Wand", "Axe", "Pickaxe", "Mainhand Sword", "Mainhand Shield", "Bow", "Trident", "Snowball", "Shovel",
+                 "Mainhand", "Scythe", "Crossbow" -> "When in Main Hand:";
+            case "Projectile" -> "When Shot:";
+            case "Offhand", "Offhand Sword", "Offhand Shield" -> "When in Offhand";
+            default -> "When Used:";
         };
     }
 
